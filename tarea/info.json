@@ -1,7 +1,6 @@
 {
-    "author": [
-        "eltrebol"
-    ],
+    "author": ["eltrebol"],
+    "name": "tarea",
     "description": "Cog para gestionar un calendario de entregas de clase, con notificaciones de fechas de entrega.",
     "install_msg": "Gracias por instalar el cog de calendario de entregas de clase. Usa los comandos de configuración para empezar a gestionar tus entregas.",
     "short": "Gestión de entregas y recordatorios.",
