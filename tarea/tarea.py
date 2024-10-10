@@ -5,88 +5,98 @@ from discord.ext import tasks
 from datetime import datetime, timedelta
 
 class HomeworkCog(commands.Cog):
-    """Un cog para gestionar un calendario de entregas de trabajos de clase"""
+    """Un cog para gestionar un calendario de entregas de clase"""
 
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890)
-        default_guild = {"announcement_channel": None, "homework": []}
+        default_guild = {"canal_anuncios": None, "entregas": []}
         self.config.register_guild(**default_guild)
-        self.check_due_dates.start()
+        self.revisar_fechas_entregas.start()
 
     @commands.guild_only()
     @commands.guildowner()
-    @commands.hybrid_group(name="homeworkconfig", aliases=["hwconfig"])
-    async def configuration(self, ctx: commands.Context):
+    @commands.hybrid_group(name="configentregas", aliases=["entregaconfig"])
+    async def configuracion(self, ctx: commands.Context):
         """Configuración del calendario de entregas."""
         pass
 
-    @configuration.command(name="setchannel", aliases=["channelset"])
-    async def set_announcement_channel(self, ctx: commands.Context, channel: discord.TextChannel):
+    @configuracion.command(name="setcanal", aliases=["canalset"])
+    async def set_canal_anuncios(self, ctx: commands.Context, canal: discord.TextChannel):
         """Configura el canal para anuncios de entregas."""
-        await self.config.guild(ctx.guild).announcement_channel.set(channel.id)
-        await ctx.send(f"Canal de anuncios configurado en {channel.mention}!")
+        await self.config.guild(ctx.guild).canal_anuncios.set(canal.id)
+        await ctx.send(f"¡Canal de anuncios configurado en {canal.mention}!")
 
-    @configuration.command(name="addhomework", aliases=["addhw"], usage="<str> <str>")
-    async def add_homework(self, ctx: commands.Context, title: str, due_date: str):
-        """Añade una nueva entrega al calendario. El formato de la fecha es YYYY-MM-DD."""
+    @configuracion.command(name="añadirtarea", aliases=["addentrega"], usage="<str> <str>")
+    async def añadir_entrega(self, ctx: commands.Context, titulo: str, fecha_entrega: str):
+        """Añade una nueva entrega al calendario. El formato de la fecha es DD-MM-AA."""
         try:
-            due_date_obj = datetime.strptime(due_date, '%Y-%m-%d').date()
+            fecha_obj = datetime.strptime(fecha_entrega, '%d-%m-%y').date()
         except ValueError:
-            await ctx.send("Formato de fecha inválido. Usa YYYY-MM-DD.")
+            await ctx.send("Formato de fecha inválido. Usa DD-MM-AA.")
             return
 
-        # Agregar entrega a la base de datos
-        async with self.config.guild(ctx.guild).homework() as homework_list:
-            homework_list.append({"title": title, "due_date": due_date})
+        async with self.config.guild(ctx.guild).entregas() as lista_entregas:
+            lista_entregas.append({"titulo": titulo, "fecha_entrega": fecha_entrega})
 
-        await ctx.send(f"Entrega '{title}' añadida para el {due_date}!")
+        await ctx.send(f"¡Entrega '{titulo}' añadida para el {fecha_entrega}!")
 
-    @configuration.command(name="listhomework", aliases=["hwlist"])
-    async def list_homework(self, ctx: commands.Context):
+    @configuracion.command(name="listartareas", aliases=["listentregas"])
+    async def listar_entregas(self, ctx: commands.Context):
         """Muestra todas las entregas pendientes."""
-        homework_list = await self.config.guild(ctx.guild).homework()
-        if not homework_list:
+        lista_entregas = await self.config.guild(ctx.guild).entregas()
+        if not lista_entregas:
             await ctx.send("No hay entregas pendientes.")
             return
 
-        message = "**Lista de entregas pendientes:**\n"
-        for hw in homework_list:
-            message += f"- {hw['title']} (Fecha límite: {hw['due_date']})\n"
-        await ctx.send(message)
+        mensaje = "**Lista de entregas pendientes:**\n"
+        for entrega in lista_entregas:
+            mensaje += f"- {entrega['titulo']} (Fecha límite: {entrega['fecha_entrega']})\n"
+        await ctx.send(mensaje)
+
+    @configuracion.command(name="eliminartarea", aliases=["borrarentrega"])
+    async def eliminar_entrega(self, ctx: commands.Context, titulo: str):
+        """Elimina una entrega específica del calendario."""
+        async with self.config.guild(ctx.guild).entregas() as lista_entregas:
+            for entrega in lista_entregas:
+                if entrega['titulo'].lower() == titulo.lower():
+                    lista_entregas.remove(entrega)
+                    await ctx.send(f"La entrega '{titulo}' ha sido eliminada.")
+                    return
+
+            await ctx.send(f"No se encontró ninguna entrega con el título '{titulo}'.")
 
     @tasks.loop(hours=24)
-    async def check_due_dates(self):
+    async def revisar_fechas_entregas(self):
         """Revisa las fechas de entrega y envía avisos si es necesario."""
-        current_date = datetime.now().date()
-        check_date = current_date + timedelta(days=1)
+        fecha_actual = datetime.now().date()
+        fecha_aviso = fecha_actual + timedelta(days=1)
 
         for guild in self.bot.guilds:
-            channel_id = await self.config.guild(guild).announcement_channel()
-            if not channel_id:
+            canal_id = await self.config.guild(guild).canal_anuncios()
+            if not canal_id:
                 continue
 
-            channel = self.bot.get_channel(channel_id)
-            if not channel:
+            canal = self.bot.get_channel(canal_id)
+            if not canal:
                 continue
 
-            homework_list = await self.config.guild(guild).homework()
+            lista_entregas = await self.config.guild(guild).entregas()
 
             # Buscar entregas con fecha límite mañana
-            for hw in homework_list:
-                due_date = datetime.strptime(hw['due_date'], '%Y-%m-%d').date()
-                if due_date == check_date:
-                    await channel.send(f"📢 Recordatorio: La entrega '{hw['title']}' es mañana ({due_date})!")
+            for entrega in lista_entregas:
+                fecha_entrega = datetime.strptime(entrega['fecha_entrega'], '%d-%m-%y').date()
+                if fecha_entrega == fecha_aviso:
+                    await canal.send(f"📢 Recordatorio: La entrega '{entrega['titulo']}' es mañana ({entrega['fecha_entrega']})!")
 
     @commands.guild_only()
     @commands.guildowner()
-    @commands.hybrid_group(name="clearhomework", aliases=["hclear"])
-    async def clear_homework(self, ctx: commands.Context):
+    @commands.hybrid_group(name="limpiartareas", aliases=["clearentregas"])
+    async def limpiar_entregas(self, ctx: commands.Context):
         """Elimina todas las entregas del calendario."""
-        await self.config.guild(ctx.guild).homework.set([])
+        await self.config.guild(ctx.guild).entregas.set([])
         await ctx.send("Todas las entregas han sido eliminadas.")
 
-    @check_due_dates.before_loop
-    async def before_check_due_dates(self):
+    @revisar_fechas_entregas.before_loop
+    async def antes_revisar_fechas(self):
         await self.bot.wait_until_ready()
-
