@@ -1,0 +1,25 @@
+{
+    "author": [
+        "eltrebol"
+    ],
+    "description": "Cog para gestionar un calendario de entregas de clase, con notificaciones de fechas de entrega.",
+    "install_msg": "Gracias por instalar el cog de calendario de entregas de clase. Usa los comandos de configuración para empezar a gestionar tus entregas.",
+    "short": "Gestión de entregas y recordatorios.",
+    "permissions": [
+        "read_messages",
+        "send_messages",
+        "embed_links"
+    ],
+    "requirements": [
+        "discord.py",
+        "aiosqlite"
+    ],
+    "end_user_data_statement": "Este cog almacena información sobre entregas y configuraciones en una base de datos local. No recopila ni comparte datos personales sin consentimiento.",
+    "tags": [
+        "homework",
+        "calendar",
+        "notifications",
+        "school"
+    ],
+    "min_bot_version": "3.5.0"
+}
