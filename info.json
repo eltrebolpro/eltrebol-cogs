@@ -1,0 +1,8 @@
+{
+    "author" : ["eltrebol"],
+    "install_msg" : "Cogs de eltrebol",
+    "name" : "eltrebol-cogs",
+    "short" : "Cogs for Red-DiscordBot!",
+    "description" : "Cogs for Red-DiscordBot!",
+    "tags" : ["utility", "functionalities"]
+}
