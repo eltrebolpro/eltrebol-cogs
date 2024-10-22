@@ -11,7 +11,7 @@ class God(commands.Cog):
         self.config = Config.get_conf(self, identifier=8542951920)
         self.config.register_guild(**default_guild)
 
-    def has_higher_role(ctx, target: discord.Member):
+    def has_higher_role(self, ctx, target: discord.Member):
         return ctx.author.top_role > target.top_role
   
     @commands.guild_only()
