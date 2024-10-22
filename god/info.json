@@ -1,0 +1,23 @@
+{
+    "author": ["eltrebol"],
+    "name": "god",
+    "description": "Cog para gestionar servidores.",
+    "install_msg": "Gracias por instalar el cog de administración. Usa los comandos de configuración para empezar a gestionar tus servidores.",
+    "short": "Gestión de servidores.",
+    "permissions": [
+        "read_messages",
+        "send_messages",
+        "embed_links",
+        "administrator"
+    ],
+    "requirements": [
+        "discord.py",
+        "asyncio"
+    ],
+    "end_user_data_statement": "Este cog se usa para la administración, usalo con responsabilidad.",
+    "tags": [
+        "administrator",
+        "admin"
+    ],
+    "min_bot_version": "3.5.0"
+}
