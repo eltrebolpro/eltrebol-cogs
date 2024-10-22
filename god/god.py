@@ -18,7 +18,7 @@ class God(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.hybrid_group(name="hakai", aliases=["hakai"])
     async def ban(ctx, member: discord.Member, *, reason=None):
-    if has_higher_role(ctx, member):
+    if has_higher_role(self, ctx, member):
         try:
             await ctx.send('https://tenor.com/view/beerus-gif-20373634')
         except discord.HTTPException as error:
