@@ -12,7 +12,7 @@ class God(commands.Cog):
         self.config.register_guild(**default_guild)
 
     def has_higher_role(ctx, target: discord.Member):
-    return ctx.author.top_role > target.top_role
+        return ctx.author.top_role > target.top_role
   
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
